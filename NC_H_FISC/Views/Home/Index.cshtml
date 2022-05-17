@@ -78,7 +78,10 @@
 			url: url,
 			method: method,
 			dataType: "json",
-			contentType: 'application/json; charset=UTF-8',
+			headers: { 
+				'Accept': 'application/json',
+				'Content-Type': 'application/json' 
+			},
 			data: body ? JSON.stringify(body) : null,
 			success: function (response) {
 				if (response.success) {

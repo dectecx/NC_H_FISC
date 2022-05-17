@@ -3,7 +3,6 @@ using NC_H_FISC.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 
 namespace NC_H_FISC.Controllers
 {
@@ -36,38 +35,44 @@ namespace NC_H_FISC.Controllers
             }
             catch (Exception ex)
             {
-                return BuildResponse<InsertModelReq, InsertModelRsp>(false, ex.Message, null, null);
+                return BuildResponse<InsertModelReq, InsertModelRsp>(false, ex.InnerException?.Message ?? ex.Message, null, null);
             }
         }
 
         [Route("api/v1/fisc/bank/{bankCode}")]
         [HttpGet]
-        public ModelResult<GetModelReq, GetModelRsp> Get(GetModelReq req)
+        public ModelResult<GetModelReq, GetModelRsp> Get(string bankCode)
         {
             try
             {
+                var req = new GetModelReq { bankCode = bankCode };
                 var model = db.Banktab.Where(e => e.Bankcode == req.bankCode).FirstOrDefault();
-                var result = new GetModelRsp
+                GetModelRsp result = null;
+                if (model != null)
                 {
-                    bankCode = model.Bankcode,
-                    bankName = model.Bankname,
-                    telZone = model.Telzone,
-                    telNo = model.Telno
-                };
+                    result = new GetModelRsp
+                    {
+                        bankCode = model.Bankcode,
+                        bankName = model.Bankname,
+                        telZone = model.Telzone,
+                        telNo = model.Telno
+                    };
+                }
                 return BuildResponse<GetModelReq, GetModelRsp>(true, null, null, result);
             }
             catch (Exception ex)
             {
-                return BuildResponse<GetModelReq, GetModelRsp>(false, ex.Message, null, null);
+                return BuildResponse<GetModelReq, GetModelRsp>(false, ex.InnerException?.Message ?? ex.Message, null, null);
             }
         }
 
         [Route("api/v1/fisc/bank")]
         [HttpGet]
-        public ModelResult<GetManyModelReq, GetManyModelRsp> GetMany(GetManyModelReq req)
+        public ModelResult<GetManyModelReq, GetManyModelRsp> GetMany(string bankCode, string telZone)
         {
             try
             {
+                var req = new GetManyModelReq { bankCode = bankCode, telZone = telZone };
                 var models = db.Banktab.AsQueryable();
                 if (!string.IsNullOrWhiteSpace(req.bankCode))
                 {
@@ -95,45 +100,60 @@ namespace NC_H_FISC.Controllers
             }
             catch (Exception ex)
             {
-                return BuildResponse<GetManyModelReq, GetManyModelRsp>(false, ex.Message, null, null);
+                return BuildResponse<GetManyModelReq, GetManyModelRsp>(false, ex.InnerException?.Message ?? ex.Message, null, null);
             }
         }
 
         [Route("api/v1/fisc/bank/{bankCode}")]
         [HttpDelete]
-        public ModelResult<DeleteModelReq, DeleteModelRsp> Delete(DeleteModelReq req)
+        public ModelResult<DeleteModelReq, DeleteModelRsp> Delete(string bankCode)
         {
             try
             {
+                var req = new DeleteModelReq { bankCode = bankCode };
                 var model = db.Banktab.Where(e => e.Bankcode == req.bankCode).FirstOrDefault();
-                db.Banktab.Remove(model);
-                db.SaveChanges();
-                return BuildResponse<DeleteModelReq, DeleteModelRsp>(true, null, null, new DeleteModelRsp());
+                if (model != null)
+                {
+                    db.Banktab.Remove(model);
+                    db.SaveChanges();
+                    return BuildResponse<DeleteModelReq, DeleteModelRsp>(true, null, null, new DeleteModelRsp());
+                }
+                else
+                {
+                    return BuildResponse<DeleteModelReq, DeleteModelRsp>(false, "刪除失敗:查無資料", null, new DeleteModelRsp());
+                }
             }
             catch (Exception ex)
             {
-                return BuildResponse<DeleteModelReq, DeleteModelRsp>(false, ex.Message, null, null);
+                return BuildResponse<DeleteModelReq, DeleteModelRsp>(false, ex.InnerException?.Message ?? ex.Message, null, null);
             }
         }
 
         [Route("api/v1/fisc/bank/{bankCode}")]
         [HttpPut]
-        public ModelResult<UpdateModelReq, UpdateModelRsp> Update(UpdateModelReq req)
+        public ModelResult<UpdateModelReq, UpdateModelRsp> Update(string bankCode, UpdateModelReq req)
         {
             try
             {
                 var model = db.Banktab.Where(e => e.Bankcode == req.bankCode).FirstOrDefault();
-                model.Bankcode = req.bankCode;
-                model.Bankname = req.bankName;
-                model.Telzone = req.telZone;
-                model.Telno = req.telNo;
-                model.Updatedate = DateTime.Now.ToString("yyyyMMdd");
-                db.SaveChanges();
-                return BuildResponse<UpdateModelReq, UpdateModelRsp>(true, null, req, new UpdateModelRsp());
+                if (model != null)
+                {
+                    model.Bankcode = req.bankCode;
+                    model.Bankname = req.bankName;
+                    model.Telzone = req.telZone;
+                    model.Telno = req.telNo;
+                    model.Updatedate = DateTime.Now.ToString("yyyyMMdd");
+                    db.SaveChanges();
+                    return BuildResponse<UpdateModelReq, UpdateModelRsp>(true, null, req, new UpdateModelRsp());
+                }
+                else
+                {
+                    return BuildResponse<UpdateModelReq, UpdateModelRsp>(false, "更新失敗:查無資料", req, null);
+                }
             }
             catch (Exception ex)
             {
-                return BuildResponse<UpdateModelReq, UpdateModelRsp>(false, ex.Message, null, null);
+                return BuildResponse<UpdateModelReq, UpdateModelRsp>(false, ex.InnerException?.Message ?? ex.Message, null, null);
             }
         }
 
