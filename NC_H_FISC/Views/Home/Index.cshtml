@@ -1,8 +1,93 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+	ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+	<h1 class="display-4">Welcome</h1>
+	<p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<form action>
+	<div>
+		<label>bankCode</label>
+		<input type="text" name="bankCode" />
+	</div>
+	<div>
+		<label>bankName</label>
+		<input type="text" name="bankName" />
+	</div>
+	<div>
+		<label>telZone</label>
+		<input type="text" name="telZone" />
+	</div>
+	<div>
+		<label>telNo</label>
+		<input type="text" name="telNo" />
+	</div>
+</form>
+<div>
+	<button type="button" onclick="cmd('insert')">新增</button>
+	<button type="button" onclick="cmd('getMany')">查詢多筆</button>
+	<button type="button" onclick="cmd('get')">查詢單筆</button>
+	<button type="button" onclick="cmd('delete')">刪除</button>
+	<button type="button" onclick="cmd('update')">修改</button>
+</div>
+<div>
+	<label>執行結果</label>
+	<p id="result"></p>
+</div>
+@section Scripts {
+<script>
+	function cmd(act) {
+		var url = ''
+		var method = '';
+		var body = null;
+		if (act == 'insert') {
+			url = '/api/v1/fisc/bank/';
+			method = 'post';
+			body = {
+				bankCode: $('[name=bankCode]').val(),
+				bankName: $('[name=bankName]').val(),
+				telZone: $('[name=telZone]').val(),
+				telNo: $('[name=telNo]').val(),
+			};
+		} else if (act == 'getMany') {
+			url = '/api/v1/fisc/bank?bankCode=' + $('[name=bankCode]').val() + '&telZone=' + $('[name=telZone]').val();
+			method = 'get';
+		} else if (act == 'get') {
+			url = '/api/v1/fisc/bank/' + $('[name=bankCode]').val();
+			method = 'get';
+		} else if (act == 'delete') {
+			url = '/api/v1/fisc/bank/' + $('[name=bankCode]').val();
+			method = 'delete';
+		} else if (act == 'update') {
+			url = '/api/v1/fisc/bank/' + $('[name=bankCode]').val();
+			method = 'put';
+			body = {
+				bankCode: $('[name=bankCode]').val(),
+				bankName: $('[name=bankName]').val(),
+				telZone: $('[name=telZone]').val(),
+				telNo: $('[name=telNo]').val(),
+			};
+		} else {
+			alert('輸入參數錯誤');
+			return false;
+		}
+
+		$.ajax({
+			url: url,
+			method: method,
+			dataType: "json",
+			contentType: 'application/json; charset=UTF-8',
+			data: body ? JSON.stringify(body) : null,
+			success: function (response) {
+				alert('執行成功');
+				$('#result').text(JSON.stringify(response));
+			},
+			error: function (error) {
+				alert('發生錯誤:' + error);
+			}
+		})
+	}
+</script>
+}
