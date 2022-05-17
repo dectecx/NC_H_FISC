@@ -3,6 +3,11 @@ using NC_H_FISC.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace NC_H_FISC.Controllers
 {
@@ -154,6 +159,28 @@ namespace NC_H_FISC.Controllers
             catch (Exception ex)
             {
                 return BuildResponse<UpdateModelReq, UpdateModelRsp>(false, ex.InnerException?.Message ?? ex.Message, null, null);
+            }
+        }
+
+        [Route("api/v1/fisc/status")]
+        [HttpPost]
+        public async Task<ModelResult<OpcModelReq, OpcModelRsp>> QueryOpc(OpcModelReq req)
+        {
+            try
+            {
+                HttpClient client = new HttpClient() { BaseAddress = new Uri("http://localhost:29831") };
+                string content = JsonSerializer.Serialize(req);
+                var buffer = Encoding.UTF8.GetBytes(content);
+                var byteContent = new ByteArrayContent(buffer);
+                byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                var response = await client.PostAsync("QueryOpc", byteContent).ConfigureAwait(false);
+                string result = await response.Content.ReadAsStringAsync();
+
+                return BuildResponse<OpcModelReq, OpcModelRsp>(true, null, req, null);
+            }
+            catch (Exception ex)
+            {
+                return BuildResponse<OpcModelReq, OpcModelRsp>(false, ex.InnerException?.Message ?? ex.Message, null, null);
             }
         }
 

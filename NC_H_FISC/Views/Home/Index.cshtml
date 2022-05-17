@@ -7,34 +7,56 @@
 	<p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 
-<form action>
-	<div>
-		<label>bankCode</label>
-		<input type="text" name="bankCode" />
+<div class="row">
+	<div class="col-6">
+		<div>
+			<label>bankCode</label>
+			<input type="text" name="bankCode" />
+		</div>
+		<div>
+			<label>bankName</label>
+			<input type="text" name="bankName" />
+		</div>
+		<div>
+			<label>telZone</label>
+			<input type="text" name="telZone" />
+		</div>
+		<div>
+			<label>telNo</label>
+			<input type="text" name="telNo" />
+		</div>
+		<div>
+			<button type="button" onclick="cmd('insert')">新增</button>
+			<button type="button" onclick="cmd('getMany')">查詢多筆</button>
+			<button type="button" onclick="cmd('get')">查詢單筆</button>
+			<button type="button" onclick="cmd('delete')">刪除</button>
+			<button type="button" onclick="cmd('update')">修改</button>
+		</div>
 	</div>
-	<div>
-		<label>bankName</label>
-		<input type="text" name="bankName" />
+	<div class="col-6">
+		<div>
+			<label>執行結果</label>
+			<p id="result"></p>
+		</div>
 	</div>
-	<div>
-		<label>telZone</label>
-		<input type="text" name="telZone" />
-	</div>
-	<div>
-		<label>telNo</label>
-		<input type="text" name="telNo" />
-	</div>
-</form>
-<div>
-	<button type="button" onclick="cmd('insert')">新增</button>
-	<button type="button" onclick="cmd('getMany')">查詢多筆</button>
-	<button type="button" onclick="cmd('get')">查詢單筆</button>
-	<button type="button" onclick="cmd('delete')">刪除</button>
-	<button type="button" onclick="cmd('update')">修改</button>
 </div>
-<div>
-	<label>執行結果</label>
-	<p id="result"></p>
+<hr />
+<div class="row">
+	<div class="col-6">
+		<div>
+			<label>bankCode</label>
+			<input type="text" name="opcBankCode" />
+		</div>
+		<div>
+			<button type="button" onclick="queryOpc()">發送OPC查詢行庫狀態</button>
+		</div>
+	</div>
+	<div class="col-6">
+		<div>
+			<label>執行結果</label>
+			<p id="opcResult"></p>
+		</div>
+	</div>
 </div>
 @section Scripts {
 <script>
@@ -78,9 +100,9 @@
 			url: url,
 			method: method,
 			dataType: "json",
-			headers: { 
+			headers: {
 				'Accept': 'application/json',
-				'Content-Type': 'application/json' 
+				'Content-Type': 'application/json'
 			},
 			data: body ? JSON.stringify(body) : null,
 			success: function (response) {
@@ -90,6 +112,36 @@
 				} else {
 					alert('執行失敗');
 					$('#result').text(response.errorMessage);
+				}
+			},
+			error: function (error) {
+				alert('發生錯誤:' + error);
+			}
+		})
+	}
+
+	function queryOpc() {
+		var url = '/api/v1/fisc/status/'
+		var method = 'post';
+		var body = {
+			bankCode: $('[name=opcBankCode]').val()
+		};
+		$.ajax({
+			url: url,
+			method: method,
+			dataType: "json",
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			data: body ? JSON.stringify(body) : null,
+			success: function (response) {
+				if (response.success) {
+					alert('執行成功');
+					$('#opcResult').text(JSON.stringify(response.data));
+				} else {
+					alert('執行失敗');
+					$('#opcResult').text(response.errorMessage);
 				}
 			},
 			error: function (error) {
