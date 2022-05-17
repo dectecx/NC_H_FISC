@@ -174,9 +174,17 @@ namespace NC_H_FISC.Controllers
                 var byteContent = new ByteArrayContent(buffer);
                 byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 var response = await client.PostAsync("QueryOpc", byteContent).ConfigureAwait(false);
-                string result = await response.Content.ReadAsStringAsync();
+                string respStr = await response.Content.ReadAsStringAsync();
 
-                return BuildResponse<OpcModelReq, OpcModelRsp>(true, null, req, null);
+                var respObj = JsonSerializer.Deserialize<ModelResult<OpcModelReq, OpcModelRsp>>(respStr, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+                if (!respObj.Success)
+                {
+                    return BuildResponse<OpcModelReq, OpcModelRsp>(false, respObj.ErrorMessage, null, null);
+                }
+                return BuildResponse<OpcModelReq, OpcModelRsp>(true, null, req, respObj.Data.Rsp);
             }
             catch (Exception ex)
             {
