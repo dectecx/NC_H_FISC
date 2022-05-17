@@ -81,8 +81,13 @@
 			contentType: 'application/json; charset=UTF-8',
 			data: body ? JSON.stringify(body) : null,
 			success: function (response) {
-				alert('執行成功');
-				$('#result').text(JSON.stringify(response));
+				if (response.success) {
+					alert('執行成功');
+					$('#result').text(JSON.stringify(response.data));
+				} else {
+					alert('執行失敗');
+					$('#result').text(response.errorMessage);
+				}
 			},
 			error: function (error) {
 				alert('發生錯誤:' + error);
